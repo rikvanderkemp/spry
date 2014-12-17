@@ -52,6 +52,13 @@ To stop the server simply run
 
 	./spry.sh stop
 	
+## Side notes and disclaimers ##
+
+* This is for obvious reasons __not__ for production usage.
+* It is meant to be simple and not complicated, function over form, KISS and all those fancy terms
+* I have no intention right now to create python modules and integrations with PIP, if you would like to contribute that would be awesome.
+* There is a slight chance that using this system causes blackholes and cracks in time, do not blame me.
+
 ## What is next? ##
 
 Go and prototype, learn Jinja2 to make it easier for yourself.
