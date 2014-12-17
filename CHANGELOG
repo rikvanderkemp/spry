@@ -1,0 +1,9 @@
+Spry Changelog
+
+0.2.0
+    Added the changelog
+    Added a rudimentary build script to spry.sh
+    Changed references to static to not be absolute
+
+0.1.0
+    Initial project readied for github
