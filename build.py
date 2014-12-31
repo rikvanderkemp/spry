@@ -6,13 +6,15 @@ import subprocess
 import sys
 import re
 
+BUILD_FOLDER = './build'
+
 
 def clean():
     """
         Cleanup build directory
     """
     print("Removing possible build directory....")
-    subprocess.call(["rm", "-Rf", "./build"])
+    subprocess.call(["rm", "-Rf", BUILD_FOLDER])
 
 
 def ping():
@@ -48,7 +50,7 @@ def read_write_response():
             print("Weirdness has happened trying to process %s" % full_url)
             sys.exit()
 
-        target_path = './build/%s' % url
+        target_path = '%s/%s' % (BUILD_FOLDER, url)
 
         print("Saving HTML output to %s" % target_path)
 
@@ -60,7 +62,7 @@ def read_write_response():
 
 def generate_folder_structure():
     """ Create build folder """
-    subprocess.call(["mkdir", "build"])
+    subprocess.call(["mkdir", BUILD_FOLDER])
 
     file_list = generate_file_list()
 
@@ -75,11 +77,11 @@ def generate_folder_structure():
             """
                 We are only concerned about non-root level elements
             """
-            subprocess.call(["mkdir", "build/%s" % path_chunks[0]])
+            subprocess.call(["mkdir", "%s/%s" % (BUILD_FOLDER, path_chunks[0])])
 
 
 def collect_static():
-    subprocess.call(["cp", "-Rf", "web/static", "build"])
+    subprocess.call(["cp", "-Rf", "../web/static", BUILD_FOLDER])
 
 
 print(

@@ -1,3 +1,3 @@
-from spry.spry import *
+import spry.server
 
-run_server()
+spry.server.run_server()
