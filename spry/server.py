@@ -1,4 +1,8 @@
 import os
+import re
+
+import spry.structure
+import spry.template
 from spry.config import *
 
 
@@ -16,15 +20,36 @@ def server(environ, start_response):
         path = os.path.normpath(path)
 
         if path == '/':
-            f = []
-            for (dirpath, dirnames, filenames) in os.walk(TEMPLATE_FILE_DIR):
-                f.extend(filenames)
+            """
+                The root of our website will contain a very simple
+                file listing containing links to both static
+                and dynamic (=yaml fueled) files
+            """
+            file_listing = []
+
+            spry.structure.get_files_from_static_content_root(file_listing)
+
+            if os.path.isdir(CONTENT_FILE_DIR):
+                spry.structure.get_files_from_yaml_directories(file_listing)
 
             return [('<a href="%s">%s</a><br>' %
-                    (filename, filename)).encode('UTF-8') for filename in f]
+                    (filename, filename)).encode('UTF-8')
+                    for filename in file_listing]
         else:
+            template_data = False
+
+            """
+                if a path with a .html extension is given
+                try and retrieve the matching yml file
+            """
+            if re.search('.*\.html', path):
+                template_data = spry.template.get_yaml_data(path)
+                if template_data:
+                    path = spry.template.determine_template_by_path(path)
+
+            # Serve regular existing html templates
             template = TEMPLATE_ENVIRONMENT_LOADER.get_template(path)
-            render = template.render()
+            render = template.render(data=template_data)
 
             return [render.encode('UTF-8')]
 
