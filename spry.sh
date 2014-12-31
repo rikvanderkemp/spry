@@ -26,34 +26,12 @@ elif [ "$1" = "stop" ]
     then
         killTasks
         rm run.lock
-elif [ "$1" = "build" ]
+elif [ "$1" = "restart" ]
     then
-        if [ ! -f run.lock ];
-            then
-                runAll
-        fi
-
-        FILES=./web/templates/*
-
-        if [ -d build ]
-            then
-                rm -Rf build
-        fi
-
-        mkdir build
-
-        cp -Rf web/static build
-
-        for f in $FILES
-        do
-            if [ -f $f ];
-                then
-                  echo "Processing $f file..."
-                  wget  "http://localhost:8000/$(basename $f)" -O ./build/$(basename $f)
-            fi
-        done
-
-        echo "Build complete."
+        killTasks
+        rm run.lock
+        runAll
+        echo "All tasks run in the background, press enter if you did not return to your cli"
 else
     echo "Please run with start|stop"
 fi
