@@ -1,5 +1,10 @@
 Spry Changelog
 
+1.0.0-alpha.1
+    Restructured entire application so it is easy to check in and out from git
+    Added setup.py for easy installation of spry
+    
+
 0.3.0
     Added YAML support and resuable templates
 
