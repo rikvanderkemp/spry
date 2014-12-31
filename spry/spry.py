@@ -7,5 +7,4 @@ def run_server():
     we route everything through our 'server' app """
 
     httpd = make_server('', 8000, server)
-    # print("Serving on port 8000...")
     httpd.serve_forever()
