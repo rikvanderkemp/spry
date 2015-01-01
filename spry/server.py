@@ -38,7 +38,7 @@ def server(environ, start_response):
             file_listing = []
 
             spry.structure.get_static_html_files(
-                file_list, TEMPLATE_FILE_DIR)
+                file_listing, TEMPLATE_FILE_DIR)
 
             if os.path.isdir(CONTENT_FILE_DIR):
                 file_listing.extend(
