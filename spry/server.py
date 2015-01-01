@@ -37,10 +37,12 @@ def server(environ, start_response):
             """
             file_listing = []
 
-            spry.structure.get_files_from_static_content_root(file_listing)
+            spry.structure.get_static_html_files(
+                file_list, TEMPLATE_FILE_DIR)
 
             if os.path.isdir(CONTENT_FILE_DIR):
-                spry.structure.get_files_from_yaml_directories(file_listing)
+                file_listing.extend(
+                    spry.structure.get_files_from_path(CONTENT_FILE_DIR))
 
             return [('<a href="%s">%s</a><br>' %
                     (filename, filename)).encode('UTF-8')

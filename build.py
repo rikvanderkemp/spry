@@ -28,10 +28,12 @@ def ping():
 def generate_file_list():
     file_list = []
 
-    spry.structure.get_files_from_static_content_root(file_list)
+    spry.structure.get_static_html_files(
+        file_list, spry.config.TEMPLATE_FILE_DIR)
 
     if os.path.isdir(spry.config.CONTENT_FILE_DIR):
-        spry.structure.get_files_from_yaml_directories(file_list)
+        file_list.extend(
+            spry.structure.get_files_from_path(spry.config.CONTENT_FILE_DIR))
 
     return file_list
 

@@ -51,29 +51,21 @@ def get_files_from_path(path, max_depth=1, level=0):
         return False
 
 
-def get_files_from_static_content_root(file_listing):
+def get_static_html_files(file_listing, directory):
     """
-        Go through all 'static' files in our TEMPLATE_FILE_DIR
+        Go through all files in our given directory
         and add these to our files list. We will only be scanning
         through our root directory and won't descend
         into any subdirectories.
+
+        Static files in spry are considered without the usage
+        of a _ (underscore) at the beginning of the file name.
     """
-    for (item) in os.listdir(TEMPLATE_FILE_DIR):
-        if (os.path.isfile(os.path.join(TEMPLATE_FILE_DIR, item))):
+    for (item) in os.listdir(directory):
+        if (os.path.isfile(os.path.join(directory, item))):
             """
                 Exclude files beginning with a _ (underscore)
                 these files will be used to populate from yaml files
             """
             if re.search('^(?!\_)', item):
                 file_listing.append(item)
-
-
-def get_files_from_yaml_directories(file_listing):
-    """
-        Collect all file names from CONTENT_FILE_DIR
-        which will contain yaml files, replace their
-        extension with html for front-end consistency
-    """
-
-    file_listing.extend(get_files_from_path(CONTENT_FILE_DIR))
-    # file_listing.append(('%s.html' % item[:-4]))
