@@ -48,6 +48,10 @@ def server(environ, start_response):
                     (filename, filename)).encode('UTF-8')
                     for filename in file_listing]
         else:
+            if path == '/favicon.ico':
+                content = read_file('%s/favicon.ico' % TEMPLATE_FILE_DIR)
+                return [content]
+
             template_data = False
 
             """
@@ -77,9 +81,7 @@ def static(environ, start_response):
     path = os.path.normpath(path)
 
     if path.startswith(STATIC_FILE_DIR) and os.path.exists(path):
-        h = open(path, 'rb')
-        content = h.read()
-        h.close()
+        content = read_file(path)
 
         headers = [('content-type', content_type(path))]
         start_response('200 OK', headers)
@@ -87,6 +89,13 @@ def static(environ, start_response):
     else:
         start_response('404 NOT FOUND')
         return []
+
+
+def read_file(path):
+    h = open(path, 'rb')
+    content = h.read()
+    h.close()
+    return content
 
 
 def content_type(path):
