@@ -1,6 +1,7 @@
 import spry.structure
 import spry.config
 import os.path
+import os
 import urllib.request
 import subprocess
 import sys
@@ -43,11 +44,18 @@ def read_write_response():
 
     for url in file_list:
         try:
-            full_url = 'http://localhost:8000/%s' % url
+            if spry.config.USE_HTML_EXTENSION is False:
+                get_url = re.sub('\.html', '', url)
+            else:
+                get_url = url
+
+            full_url = 'http://localhost:8000/%s' % get_url
             print("Processing %s" % full_url)
             response = urllib.request.urlopen(full_url)
 
             html = response.read().decode('utf-8')
+        except UnicodeDecodeError:
+            html = response.read()
         except:
             print("Weirdness has happened trying to process %s" % full_url)
             sys.exit()
@@ -83,7 +91,14 @@ def generate_folder_structure():
 
 
 def collect_static():
-    subprocess.call(["cp", "-Rf", "../web/static", BUILD_FOLDER])
+    print("Copying static folder to build folder")
+    subprocess.call(
+        [
+            "cp", "-Rf",
+            "%s/web/static" % os.path.abspath(os.getcwd()),
+            BUILD_FOLDER
+        ]
+    )
 
 
 print(
