@@ -1,11 +1,11 @@
-from wsgiref.simple_server import make_server
-
 import os
 import re
+import mimetypes
+from wsgiref.simple_server import make_server
 
+import spry.config
 import spry.structure
 import spry.template
-from spry.config import *
 
 
 def run_server():
@@ -19,7 +19,7 @@ def run_server():
 def server(environ, start_response):
     # only serve the file if it is within STATIC_FILE_DIR and
     # if it exists
-    if environ['PATH_INFO'].startswith(STATIC_URL_PREFIX):
+    if environ['PATH_INFO'].startswith(spry.config.STATIC_URL_PREFIX):
         return static(environ, start_response)
     else:
         status = '200 OK'
@@ -38,36 +38,52 @@ def server(environ, start_response):
             file_listing = []
 
             spry.structure.get_static_html_files(
-                file_listing, TEMPLATE_FILE_DIR)
+                file_listing, spry.config.TEMPLATE_FILE_DIR)
 
-            if os.path.isdir(CONTENT_FILE_DIR):
+            if os.path.isdir(spry.config.CONTENT_FILE_DIR):
                 file_listing.extend(
-                    spry.structure.get_files_from_path(CONTENT_FILE_DIR))
+                    spry.structure.get_files_from_path(
+                        spry.config.CONTENT_FILE_DIR
+                    )
+                )
 
             return [('<a href="%s">%s</a><br>' %
-                    (filename, filename)).encode('UTF-8')
+                    (format_file_name_for_listing(filename),
+                        format_file_name_for_listing(filename))).encode('UTF-8')
                     for filename in file_listing]
         else:
             if path == '/favicon.ico':
-                content = read_file('%s/favicon.ico' % TEMPLATE_FILE_DIR)
+                content = read_file(
+                    '%s/favicon.ico' % spry.config.TEMPLATE_FILE_DIR
+                )
                 return [content]
 
             template_data = False
 
-            """
-                if a path with a .html extension is given
-                try and retrieve the matching yml file
-            """
-            if re.search('.*\.html', path):
-                template_data = spry.template.get_yaml_data(path)
-                if template_data:
-                    path = spry.template.determine_template_by_path(path)
+            if spry.config.USE_HTML_EXTENSION is False:
+                """
+                    Add html extension else we won't
+                    find the required or optional file.
+                """
+                path = '%s.html' % path
+
+            template_data = spry.template.get_yaml_data(path)
+            if template_data:
+                path = spry.template.determine_template_by_path(path)
 
             # Serve regular existing html templates
-            template = TEMPLATE_ENVIRONMENT_LOADER.get_template(path)
+            template = spry.config.TEMPLATE_ENVIRONMENT_LOADER \
+                .get_template(path)
             render = template.render(data=template_data)
 
             return [render.encode('UTF-8')]
+
+
+def format_file_name_for_listing(filename):
+    if spry.config.USE_HTML_EXTENSION:
+        return filename
+    else:
+        return re.sub('\.html', '', filename)
 
 
 def static(environ, start_response):
@@ -76,11 +92,14 @@ def static(environ, start_response):
 
     path = environ['PATH_INFO']
     # we want to remove '/static' from the start
-    path = path.replace(STATIC_URL_PREFIX, STATIC_FILE_DIR)
+    path = path.replace(
+        spry.config.STATIC_URL_PREFIX,
+        spry.config.STATIC_FILE_DIR
+    )
 
     path = os.path.normpath(path)
 
-    if path.startswith(STATIC_FILE_DIR) and os.path.exists(path):
+    if path.startswith(spry.config.STATIC_FILE_DIR) and os.path.exists(path):
         content = read_file(path)
 
         headers = [('content-type', content_type(path))]
@@ -103,8 +122,9 @@ def content_type(path):
     based on the file extension"""
 
     name, ext = os.path.splitext(path)
+    guessed_mimetypes = mimetypes.guess_type(path)
 
-    if ext in MIME_TABLE:
-        return MIME_TABLE[ext]
+    if guessed_mimetypes[0] is not None:
+        return guessed_mimetypes[0]
     else:
         return "application/octet-stream"
