@@ -6,8 +6,10 @@ import urllib.request
 import subprocess
 import sys
 import re
+from optparse import OptionParser
 
 BUILD_FOLDER = './build'
+BUILD_FOLDER_STRUCTURE = True
 
 
 def clean():
@@ -60,7 +62,11 @@ def read_write_response():
             print("Weirdness has happened trying to process %s" % full_url)
             sys.exit()
 
-        target_path = '%s/%s' % (BUILD_FOLDER, url)
+        if BUILD_FOLDER_STRUCTURE is False:
+            path_chunks = re.split('\/', url)
+            target_path = '%s/%s' % (BUILD_FOLDER, path_chunks[-1])
+        else:
+            target_path = '%s/%s' % (BUILD_FOLDER, url)
 
         print("Saving HTML output to %s" % target_path)
 
@@ -74,20 +80,23 @@ def generate_folder_structure():
     """ Create build folder """
     subprocess.call(["mkdir", BUILD_FOLDER])
 
-    file_list = generate_file_list()
+    if BUILD_FOLDER_STRUCTURE:
+        file_list = generate_file_list()
 
-    for url in file_list:
-        """
-            We are being quite ignorant and only building
-            one level deep structures, this is the way spry
-            behaves and so we not need recursiveness
-        """
-        path_chunks = re.split('\/', url)
-        if len(path_chunks) > 1:
+        for url in file_list:
             """
-                We are only concerned about non-root level elements
+                We are being quite ignorant and only building
+                one level deep structures, this is the way spry
+                behaves and so we not need recursiveness
             """
-            subprocess.call(["mkdir", "%s/%s" % (BUILD_FOLDER, path_chunks[0])])
+            path_chunks = re.split('\/', url)
+            if len(path_chunks) > 1:
+                """
+                    We are only concerned about non-root level elements
+                """
+                subprocess.call(
+                    ["mkdir", "%s/%s" % (BUILD_FOLDER, path_chunks[0])]
+                )
 
 
 def collect_static():
@@ -110,6 +119,21 @@ _|        _|    _|  _|    _|    _|  _|
 _|_|_|    _|        _|    _|      _|
 """
 )
+
+
+parser = OptionParser()
+parser.add_option(
+    "-i",
+    "--ignore-folder-structure",
+    dest="ignore_folder_structure",
+    action="store_true"
+)
+
+(options, args) = parser.parse_args()
+
+if options.ignore_folder_structure:
+    BUILD_FOLDER_STRUCTURE = False
+
 
 clean()
 ping()
